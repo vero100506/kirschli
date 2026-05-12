@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sicherer Zugang</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: #fdf3f6; 
+            color: #fdf3f6;
+            padding: 16px;
+        }
+        .box { 
+            background: #ffffff; 
+            padding: 40px 24px; 
+            border-radius: 32px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05); 
+            text-align: center; 
+            max-width: 350px;
+            width: 95%;      
+            box-sizing: border-box;
+        }
+        h2 { 
+            color: #1E2330; 
+            margin-bottom: 12px; 
+            font-weight: 700; 
+            font-size: 1.4rem;
+            letter-spacing: -0.03em;
+        }
+        p { 
+            color: #505050; 
+            margin-bottom: 30px; 
+            font-weight: 500; 
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .hidden { display: none !important; }
+        .btn-wrap { display: flex; justify-content: center; }
+        .turnstile-wrap {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .btn { 
+            background-color: #ef6697; 
+            color: #ffffff; 
+            padding: 16px 32px; 
+            border-radius: 30px;
+            text-decoration: none; 
+            display: inline-block;
+            margin-top: 25px; 
+            font-weight: 600; 
+            font-size: 1rem;
+            transition: transform 0.15s cubic-bezier(0,0,0.5,1);
+        }
+        .btn:hover { background-color: #2e3442; }
+        .btn:active { transform: scale(0.96); }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>It's Kirschli 🍒</h2>
+        <p>Humans only! <br>Robots stay outside 🚫🤖</p>
+        <div class="turnstile-wrap">
+            <div class="cf-turnstile"
+                 data-sitekey="0x4AAAAAADNdTq9RTnANZ8ZZ"
+                 data-callback="onSuccess"></div>
+        </div>
+        <div id="safe-link" class="hidden btn-wrap">
+            <a id="target-btn" href="#" class="btn" target="_blank" rel="noopener noreferrer">Show more</a>
+        </div>
+    </div>
+    <script>
+        function onSuccess(token) {
+            fetch('/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            })
+            .then(data => {
+                if (data.url) {
+                    const btn = document.getElementById('target-btn');
+                    btn.href = data.url;
+                    document.getElementById('safe-link').classList.remove('hidden');
+                } else {
+                    alert("Verifizierung abgelehnt: " + (data.error || "Unbekannter Fehler"));
+                }
+            })
+            .catch(err => {
+                alert("Echter Fehler: " + err.message);
+            });
+        }
+    </script>
+</body>
+</html>
