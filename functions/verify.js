@@ -1,29 +1,25 @@
 export async function onRequestPost(context) {
-    try {
-        const { token } = await context.request.json();
-        const secret = context.env.TURNSTILE_SECRET;
-        const target = context.env.TARGET_URL;
+    const { token } = await context.request.json();
 
-        if (!secret || !target) {
-            return new Response(JSON.stringify({ error: "Variablen fehlen im Dashboard" }), { status: 500 });
-        }
+    const verify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            secret: context.env.TURNSTILE_SECRET,
+            response: token,
+        }),
+    });
 
-        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}`
+    const result = await verify.json();
+
+    if (result.success) {
+        return new Response(JSON.stringify({ success: true }), {
+            headers: {
+                'Content-Type': 'application/json',
+                'Set-Cookie': `cf_verified=1; Path=/; Max-Age=120; HttpOnly; Secure; SameSite=Strict`,
+            },
         });
-
-        const data = await response.json();
-
-        if (data.success) {
-            return new Response(JSON.stringify({ url: target }), {
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } else {
-            return new Response(JSON.stringify({ error: "Token ungültig" }), { status: 403 });
-        }
-    } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    } else {
+        return Response.json({ error: 'Verification failed' }, { status: 403 });
     }
 }

@@ -3,107 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sicherer Zugang</title>
+    <title>S' Reisemädchen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: #fdf3f6; 
-            color: #fdf3f6;
-            padding: 16px;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #fdf0f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0px 32px 20px;
         }
-        .box { 
-            background: #ffffff; 
-            padding: 40px 24px; 
-            border-radius: 32px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.05); 
-            text-align: center; 
-            max-width: 350px;
-            width: 95%;      
-            box-sizing: border-box;
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -30px;
         }
-        h2 { 
-            color: #1E2330; 
-            margin-bottom: 12px; 
-            font-weight: 700; 
-            font-size: 1.4rem;
-            letter-spacing: -0.03em;
+
+        /* ── Avatar ── */
+        .avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 28px;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        p { 
-            color: #505050; 
-            margin-bottom: 30px; 
-            font-weight: 500; 
-            font-size: 0.95rem;
-            line-height: 1.5;
+
+        /* ── Heading ── */
+        h1 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
         }
-        .hidden { display: none !important; }
-        .btn-wrap { display: flex; justify-content: center; }
-        .turnstile-wrap {
+
+        /* ── Bio ── */
+        .bio {
+            font-size: 16px;
+            color: #4a4a4a;
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+
+        /* ── Instagram Icon ── */
+        .social-icon {
+            margin-bottom: 28px;
+        }
+        .social-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* ── Turnstile ── */
+        .verify-box {
             display: flex;
             justify-content: center;
-            width: 100%;
+            margin-bottom: 16px;
         }
-        .btn { 
-            background-color: #ef6697; 
-            color: #ffffff; 
-            padding: 16px 32px; 
-            border-radius: 30px;
-            text-decoration: none; 
-            display: inline-block;
-            margin-top: 25px; 
-            font-weight: 600; 
-            font-size: 1rem;
-            transition: transform 0.15s cubic-bezier(0,0,0.5,1);
+
+        .cf-turnstile {
+            filter: drop-shadow(0 1px 3px rgba(240, 98, 146, 0.08));
         }
-        .btn:hover { background-color: #2e3442; }
+
+        /* ── Button ── */
+        .btn {
+            display: block;
+            width: 300px;
+            background-color: #f06292;
+            color: #ffffff;
+            padding: 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0,0,0.5,1);
+        }
+        .btn:hover { background-color: #e64a8a; }
         .btn:active { transform: scale(0.96); }
+
+        .hidden { display: none !important; }
+
+        /* ── Error ── */
+        .error {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #b71c1c;
+            background: rgba(183,28,28,0.08);
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: none;
+        }
+        .error.show { display: block; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>It's Kirschli 🍒</h2>
-        <p>Humans only! <br>Robots stay outside 🚫🤖</p>
-        <div class="turnstile-wrap">
+    <div class="container">
+
+        <!-- ── Avatar ─────────────────────────────────────────
+             Ersetze src="" mit deinem Base64-String:
+             src="data:image/jpeg;base64,/9j/4AAQ…=="
+             Oder gib einen normalen Pfad an: src="foto.jpg"
+        ───────────────────────────────────────────────────── -->
+        <img
+            class="avatar"
+            src="mee.png"
+            alt="Profilbild"
+        >
+
+        <h1>S' Reisemädchen</h1>
+
+        <p class="bio">Alleine in der großen weiten Welt unterwegs. Ich freue mich über Supporter, Reisebegleiter und Schutzengel. 🌍✈️🌸</p>
+
+        <!-- Instagram Icon -->
+        <div class="social-icon">
+            <a href="https://www.instagram.com/urlaubmitkirschli" target="_blank" rel="noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <circle cx="17.5" cy="6.5" r="1" fill="#1a1a1a" stroke="none"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Turnstile -->
+        <div class="verify-box">
             <div class="cf-turnstile"
                  data-sitekey="0x4AAAAAADNdTq9RTnANZ8ZZ"
-                 data-callback="onSuccess"></div>
+                 data-callback="onSuccess">
+            </div>
         </div>
-        <div id="safe-link" class="hidden btn-wrap">
-            <a id="target-btn" href="#" class="btn" target="_blank" rel="noopener noreferrer">Show more</a>
-        </div>
+
+        <!-- Button (hidden until verified) -->
+        <a id="target-btn" href="/api/go" target="_blank" rel="noopener noreferrer" class="btn hidden">
+            Follow Me
+        </a>
+
+        <div id="error-msg" class="error"></div>
     </div>
+
     <script>
-        function onSuccess(token) {
-            fetch('/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: token })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                return res.json();
-            })
-            .then(data => {
-                if (data.url) {
-                    const btn = document.getElementById('target-btn');
-                    btn.href = data.url;
-                    document.getElementById('safe-link').classList.remove('hidden');
+        async function onSuccess(token) {
+            try {
+                const res = await fetch('/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                if (!res.ok) throw new Error('Serverantwort fehlgeschlagen');
+
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('target-btn').classList.remove('hidden');
+                    clearError();
                 } else {
-                    alert("Verifizierung abgelehnt: " + (data.error || "Unbekannter Fehler"));
+                    showError(data.message || 'Verifizierung fehlgeschlagen.');
+                    resetTurnstile();
                 }
-            })
-            .catch(err => {
-                alert("Echter Fehler: " + err.message);
-            });
+            } catch (err) {
+                console.error('Verifikationsfehler:', err);
+                showError('Ein Fehler ist aufgetreten. Bitte erneut versuchen.');
+                resetTurnstile();
+            }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function clearError() {
+            const el = document.getElementById('error-msg');
+            el.textContent = '';
+            el.classList.remove('show');
+        }
+
+        function resetTurnstile() {
+            if (window.turnstile) window.turnstile.reset();
         }
     </script>
 </body>
