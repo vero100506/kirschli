@@ -13,55 +13,64 @@
 
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #fdf0f4;
+            background-color: #fbbdd4;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 0px 32px 20px;
+            padding: 20px 32px;
         }
 
-        .container {
-            text-align: center;
-            max-width: 400px;
+        @media (max-width: 430px) {
+            body { padding: 20px 20px; }
+            .card { padding: 40px 16px 52px; }
+        }
+
+        /* ── White Card ── */
+        .card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 40px 32px 52px;
+            max-width: 520px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: -30px;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
         }
 
         /* ── Avatar ── */
         .avatar {
-            width: 130px;
-            height: 130px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
             border: 4px solid #ffffff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
 
         /* ── Heading ── */
         h1 {
-            font-size: 2.1rem;
+            font-size: 1.9rem;
             font-weight: 700;
             color: #1a1a1a;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         /* ── Bio ── */
         .bio {
-            font-size: 16px;
+            font-size: 15px;
             color: #4a4a4a;
             line-height: 1.65;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         /* ── Instagram Icon ── */
         .social-icon {
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .social-icon svg {
             width: 22px;
@@ -75,17 +84,13 @@
             margin-bottom: 16px;
         }
 
-        .cf-turnstile {
-            filter: drop-shadow(0 1px 3px rgba(240, 98, 146, 0.08));
-        }
-
         /* ── Button ── */
         .btn {
             display: block;
             width: 300px;
-            background-color: #f06292;
+            background-color: #e8005a;
             color: #ffffff;
-            padding: 18px;
+            padding: 16px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 700;
@@ -94,11 +99,31 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0,0,0.5,1);
+            pointer-events: none;
+            opacity: 0.5;
         }
-        .btn:hover { background-color: #e64a8a; }
+        .btn.active {
+            pointer-events: auto;
+            opacity: 1;
+        }
+        .btn:hover { background-color: #bf004a; }
         .btn:active { transform: scale(0.96); }
 
         .hidden { display: none !important; }
+
+        /* ── Spinner shown while verifying ── */
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(227,90,134,0.25);
+            border-top-color: #e35a86;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 16px;
+            display: none;
+        }
+        .spinner.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ── Error ── */
         .error {
@@ -114,22 +139,15 @@
     </style>
 </head>
 <body>
-    <div class="container">
 
-        <!-- ── Avatar ─────────────────────────────────────────
-             Ersetze src="" mit deinem Base64-String:
-             src="data:image/jpeg;base64,/9j/4AAQ…=="
-             Oder gib einen normalen Pfad an: src="foto.jpg"
-        ───────────────────────────────────────────────────── -->
-        <img
-            class="avatar"
-            src="mee.png"
-            alt="Profilbild"
-        >
+    <div class="card">
 
-        <h1>Kirschli</h1>
+        <!-- Profile Picture -->
+        <img src="mee.png" alt="Profilbild" class="avatar">
 
-        <p class="bio">In einer Welt voller Zitronen 🍋 bin ich die Kirsche 🍒. Folge mir für mehr Reisestorys!</p>
+        <h1>Urlaub mit Kirschli 🌴</h1>
+
+        <p class="bio">Wanna join my adventure? 🍒<br>Show me you're human first!</p>
 
         <!-- Instagram Icon -->
         <div class="social-icon">
@@ -142,47 +160,107 @@
             </a>
         </div>
 
-        <!-- Turnstile -->
+        <!-- Turnstile widget -->
         <div class="verify-box">
             <div class="cf-turnstile"
                  data-sitekey="0x4AAAAAADNdTq9RTnANZ8ZZ"
-                 data-callback="onSuccess">
+                 data-callback="onTurnstileSuccess"
+                 data-error-callback="onTurnstileError"
+                 data-expired-callback="onTurnstileExpired">
             </div>
         </div>
 
-        <!-- Button (hidden until verified) -->
-        <a id="target-btn" href="/api/go" target="_blank" rel="noopener noreferrer" class="btn hidden">
-            Follow Me
-        </a>
+        <!-- Spinner shown during server verification -->
+        <div id="spinner" class="spinner"></div>
 
-        <div id="error-msg" class="error"></div>
+        <!--
+            Button is rendered but visually disabled until verification succeeds.
+            It has no href by default — clicking triggers a JS redirect via fetch,
+            so the destination URL is never exposed in the DOM before verification.
+        -->
+        <button id="target-btn" class="btn" disabled aria-disabled="true" aria-label="Weiterleitung nach Verifizierung">
+            Join Now
+        </button>
+
+        <div id="error-msg" class="error" role="alert"></div>
     </div>
 
     <script>
-        async function onSuccess(token) {
+        // ── State ───────────────────────────────────────────────────────────
+        let verified = false;
+
+        // ── Turnstile callbacks ─────────────────────────────────────────────
+        async function onTurnstileSuccess(token) {
+            if (verified) return; // guard against double-fire
+            showSpinner(true);
+            clearError();
+
             try {
                 const res = await fetch('/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
+                    body: JSON.stringify({ token }),
                 });
-
-                if (!res.ok) throw new Error('Serverantwort fehlgeschlagen');
 
                 const data = await res.json();
 
-                if (data.success) {
-                    document.getElementById('target-btn').classList.remove('hidden');
-                    clearError();
+                if (res.ok && data.success) {
+                    verified = true;
+                    activateButton();
                 } else {
-                    showError(data.message || 'Verifizierung fehlgeschlagen.');
+                    showError(data.message || 'Verifizierung fehlgeschlagen. Bitte erneut versuchen.');
                     resetTurnstile();
                 }
             } catch (err) {
-                console.error('Verifikationsfehler:', err);
+                console.error('Verification error:', err);
                 showError('Ein Fehler ist aufgetreten. Bitte erneut versuchen.');
                 resetTurnstile();
+            } finally {
+                showSpinner(false);
             }
+        }
+
+        function onTurnstileError() {
+            showError('Turnstile-Fehler. Bitte Seite neu laden.');
+        }
+
+        function onTurnstileExpired() {
+            verified = false;
+            deactivateButton();
+            showError('Verifizierung abgelaufen. Bitte erneut bestätigen.');
+            resetTurnstile();
+        }
+
+        // ── Button logic ─────────────────────────────────────────────────────
+        function activateButton() {
+            const btn = document.getElementById('target-btn');
+            btn.classList.add('active');
+            btn.disabled = false;
+            btn.setAttribute('aria-disabled', 'false');
+            btn.addEventListener('click', handleGo, { once: true });
+        }
+
+        function deactivateButton() {
+            const btn = document.getElementById('target-btn');
+            btn.classList.remove('active');
+            btn.disabled = true;
+            btn.setAttribute('aria-disabled', 'true');
+        }
+
+        /**
+         * Navigate to /api/go. The server checks the HMAC-signed cookie
+         * and will redirect to the target or back to / if invalid.
+         * Using window.location.href means the cookie is sent automatically.
+         */
+        function handleGo(e) {
+            e.preventDefault();
+            if (!verified) return;
+            window.location.href = '/api/go';
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+        function showSpinner(on) {
+            document.getElementById('spinner').classList.toggle('show', on);
         }
 
         function showError(msg) {
